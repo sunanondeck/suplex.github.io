@@ -16,7 +16,7 @@ jobs:
         id: plex
         run: |
           # Attempt to fetch the Plex identity endpoint (works even without login)
-          if curl -s --max-time 10 https://71.146.187.239:32400/web/index.html > /dev/null; then
+          if curl -k -s --max-time 30 https://71.146.187.239:32400/identity > /dev/null; then
             echo "STATUS=operational" >> $GITHUB_ENV
             echo "TITLE=Plex Server Online" >> $GITHUB_ENV
             echo "MESSAGE=The Plex server is running normally." >> $GITHUB_ENV
