@@ -4,154 +4,159 @@
 <meta charset="UTF-8">
 <title>Plex Server Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body{
-  margin:0;
+body {
+  margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  background:#0f0f0f;
-  color:#e6e6e6;
+  background: #0f0f0f;
+  color: #e6e6e6;
 }
 
-header{
-  background:#1c1c1c;
-  padding:28px;
-  text-align:center;
-  border-bottom:1px solid #2a2a2a;
+header {
+  background: #1c1c1c;
+  padding: 28px;
+  text-align: center;
+  border-bottom: 1px solid #2a2a2a;
 }
 
-h1{
-  margin:0;
-  font-weight:600;
+h1 {
+  margin: 0;
+  font-weight: 600;
 }
 
-.container{
-  max-width:900px;
-  margin:40px auto;
-  padding:0 20px;
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
 }
 
-.status{
-  border-radius:12px;
-  padding:26px;
-  margin-bottom:28px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+.status {
+  border-radius: 12px;
+  padding: 26px;
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.3s ease;
 }
 
-.operational{ background:#123b2c; }
-.maintenance{ background:#3f3511; }
-.outage{ background:#3a1414; }
+/* Status colors */
+.operational { background: #123b2c; color: #b2f2bb; }
+.maintenance { background: #3f3511; color: #f5e68f; }
+.outage { background: #3a1414; color: #f5b2b2; }
 
-.status-title{
-  font-size:22px;
-  font-weight:600;
+.status-title {
+  font-size: 24px;
+  font-weight: 700;
 }
 
-.status-message{
-  opacity:.9;
+.status-message {
+  font-size: 16px;
+  opacity: 0.9;
 }
 
-.card{
-  background:#1a1a1a;
-  border-radius:12px;
-  padding:22px;
-  margin-bottom:22px;
-  border:1px solid #2a2a2a;
+.card {
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 22px;
+  border: 1px solid #2a2a2a;
 }
 
-.card h3{
-  margin-top:0;
+.card h3 {
+  margin-top: 0;
 }
 
-.update{
-  margin-bottom:10px;
+.update {
+  margin-bottom: 10px;
 }
 
-.time{
-  opacity:.6;
-  font-size:13px;
+.time {
+  opacity: 0.6;
+  font-size: 13px;
 }
 
-footer{
-  text-align:center;
-  padding:30px;
-  opacity:.6;
-  font-size:14px;
+footer {
+  text-align: center;
+  padding: 30px;
+  opacity: 0.6;
+  font-size: 14px;
 }
 </style>
 </head>
-
 <body>
 
 <header>
-<h1>Plex Server Status</h1>
+  <h1>Plex Server Status</h1>
 </header>
 
 <div class="container">
 
-<div id="statusBox" class="status">
-<div class="status-title" id="statusTitle"></div>
-<div class="status-message" id="statusMessage"></div>
-</div>
+  <!-- Status banner -->
+  <div id="statusBox" class="status">
+    <div class="status-title" id="statusTitle"></div>
+    <div class="status-message" id="statusMessage"></div>
+  </div>
 
-<div class="card">
-<h3>Scheduled Maintenance</h3>
-<div id="maintenanceWindow"></div>
-</div>
+  <!-- Maintenance -->
+  <div class="card">
+    <h3>Scheduled Maintenance</h3>
+    <div id="maintenanceWindow"></div>
+  </div>
 
-<div class="card">
-<h3>Recent Updates</h3>
-<div id="updates"></div>
-</div>
+  <!-- Updates -->
+  <div class="card">
+    <h3>Recent Updates</h3>
+    <div id="updates"></div>
+  </div>
 
 </div>
 
 <footer>
-Last updated: <span id="lastUpdated"></span>
+  Last updated: <span id="lastUpdated"></span>
 </footer>
 
 <script>
+async function loadStatus() {
+  const res = await fetch('status.json');
+  const data = await res.json();
 
-async function loadStatus(){
+  const statusBox = document.getElementById("statusBox");
+  const statusTitle = document.getElementById("statusTitle");
+  const statusMessage = document.getElementById("statusMessage");
+  const maintenanceWindow = document.getElementById("maintenanceWindow");
+  const updates = document.getElementById("updates");
 
-const res = await fetch('status.json')
-const data = await res.json()
+  // Reset classes
+  statusBox.classList.remove("operational", "maintenance", "outage");
+  statusBox.classList.add(data.status);
 
-const statusBox = document.getElementById("statusBox")
-const statusTitle = document.getElementById("statusTitle")
-const statusMessage = document.getElementById("statusMessage")
-const maintenanceWindow = document.getElementById("maintenanceWindow")
-const updates = document.getElementById("updates")
+  // Set title and message
+  statusTitle.textContent = data.title;
+  statusMessage.textContent = data.message;
 
-statusBox.classList.add(data.status)
-statusTitle.textContent = data.title
-statusMessage.textContent = data.message
-maintenanceWindow.textContent = data.maintenanceWindow
+  // Maintenance info
+  maintenanceWindow.textContent = data.maintenanceWindow;
 
-updates.innerHTML = ""
+  // Clear updates
+  updates.innerHTML = "";
 
-data.updates.forEach(u => {
+  data.updates.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "update";
+    div.innerHTML = `<div class="time">${u.time}</div><div>${u.text}</div>`;
+    updates.appendChild(div);
+  });
 
-const div = document.createElement("div")
-div.className = "update"
-
-div.innerHTML = `
-<div class="time">${u.time}</div>
-<div>${u.text}</div>
-`
-
-updates.appendChild(div)
-
-})
-
-document.getElementById("lastUpdated").textContent = new Date().toLocaleString()
-
+  // Update last updated footer
+  document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
 }
 
-loadStatus()
+// Initial load
+loadStatus();
 
+// Optional: refresh every 5 minutes automatically
+setInterval(loadStatus, 300000);
 </script>
 
 </body>
