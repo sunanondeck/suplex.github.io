@@ -1,0 +1,35 @@
+name: Plex Status Check
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check Plex
+        id: plex
+        run: |
+          if curl -s --max-time 10 https://71.146.187.239:32400/web/index.html > /dev/null; then
+            echo "STATUS=operational" >> $GITHUB_ENV
+          else
+            echo "STATUS=outage" >> $GITHUB_ENV
+          fi
+
+      - name: Update status.json
+        run: |
+          jq '.status = env.STATUS' status.json > tmp.json
+          mv tmp.json status.json
+
+      - name: Commit if changed
+        run: |
+          git config --global user.name "status-bot"
+          git config --global user.email "actions@github.com"
+          git add status.json
+          git commit -m "Auto status update" || exit 0
+          git push
