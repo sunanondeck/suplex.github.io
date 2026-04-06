@@ -18,11 +18,11 @@ jobs:
           # Attempt to fetch the Plex identity endpoint (works even without login)
           if curl -k -s --max-time 30 https://71.146.187.239:32400/identity > /dev/null; then
             echo "STATUS=operational" >> $GITHUB_ENV
-            echo "TITLE=Plex Server Online" >> $GITHUB_ENV
+            echo "TITLE=NO - Plex Server Online" >> $GITHUB_ENV
             echo "MESSAGE=The Plex server is running normally." >> $GITHUB_ENV
           else
             echo "STATUS=outage" >> $GITHUB_ENV
-            echo "TITLE=Plex Server Offline" >> $GITHUB_ENV
+            echo "TITLE=YES - Plex Server Offline" >> $GITHUB_ENV
             echo "MESSAGE=The Plex server is currently unreachable. Please check back later." >> $GITHUB_ENV
           fi
 
