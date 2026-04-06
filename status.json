@@ -1,7 +1,7 @@
 {
-  "status": "operational",
-  "title": "Plex Server Online",
-  "message": "The Plex server is running normally.",
+  "status": "outage",
+  "title": "Plex Server Offline",
+  "message": "The Plex server is currently unreachable. Please check back later.",
   "maintenanceWindow": "Planned outages from 4/6 to 4/13 between 8PM-8AM PST",
   "updates": [
     {
