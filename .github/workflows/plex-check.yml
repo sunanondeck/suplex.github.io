@@ -42,6 +42,6 @@ jobs:
 
           git add status.json
 
-          # Commit every run, even if status unchanged
-          git commit -m "Update Suplex status" || echo "No changes to commit"
+          # Force commit every run
+          git commit -m "Update Suplex status" --allow-empty
           git push
