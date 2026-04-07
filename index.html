@@ -9,65 +9,73 @@
 :root {
   --plex-orange: #e5a00d;
   --plex-dark: #141414;
-  --plex-light: #f6f6f6;
-  --operational: #2ecc71;
-  --outage: #ff4d4d;
+  --white: #ffffff;
+  --down-red: #ff4d4d;
 }
 
 body{
   margin:0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
   background: var(--plex-dark);
-  color: var(--plex-light);
+  color: var(--white);
   text-align:center;
-  transition: background 0.5s;
-  overflow-x: hidden;
+  transition: background 0.4s;
+  overflow-x:hidden;
 }
 
-/* Sliding maintenance banner */
+/* Maintenance banner */
 #maintenance-banner{
-  position: fixed;
-  top: -60px;
+  position:fixed;
+  top:-60px;
   left:0;
   width:100%;
-  background: var(--plex-orange);
-  color: var(--plex-dark);
+  background:var(--plex-orange);
+  color:#141414;
   font-weight:700;
   padding:15px 0;
   font-size:18px;
   z-index:9999;
-  transition: top 0.6s ease;
+  transition:top 0.6s ease;
 }
 
 #content{
-  transition: margin-top 0.6s ease;
-  padding-top: 60px;
+  transition:margin-top 0.6s ease;
+  padding-top:60px;
 }
 
 .question{
   font-size:42px;
-  color: var(--plex-orange);
+  color:var(--plex-orange);
   font-weight:700;
 }
 
+/* YES / NO box */
 .answer{
-  font-size:180px;
+  font-size:160px;
   font-weight:800;
-  margin-top:40px;
+  margin:40px auto 10px auto;
+  padding:20px 60px;
+  border-radius:20px;
+  border:6px solid;
+  display:inline-block;
+}
+
+/* Server UP */
+.operational{
+  color:var(--white);
+  border-color:var(--white);
+}
+
+/* Server DOWN */
+.outage{
+  color:var(--down-red);
+  border-color:var(--down-red);
 }
 
 .message{
-  margin-top:25px;
+  margin-top:20px;
   font-size:22px;
   font-weight:600;
-}
-
-.operational{
-  color: var(--operational);
-}
-
-.outage{
-  color: var(--outage);
 }
 
 footer{
@@ -84,14 +92,14 @@ footer{
 
 <div id="content">
 
-  <div class="question">Is Suplex down?</div>
+<div class="question">Is Suplex down?</div>
 
-  <div id="answer" class="answer">...</div>
-  <div id="message" class="message"></div>
+<div id="answer" class="answer">...</div>
+<div id="message" class="message"></div>
 
-  <footer>
-  Last checked: <span id="updated"></span>
-  </footer>
+<footer>
+Last checked: <span id="updated"></span>
+</footer>
 
 </div>
 
@@ -108,15 +116,11 @@ async function loadStatus(){
   if(data.status === "operational"){
       answer.textContent = "NO";
       answer.className = "answer operational";
-
       message.className = "message operational";
-      document.body.style.backgroundColor = "var(--plex-dark)";
   } else {
       answer.textContent = "YES";
       answer.className = "answer outage";
-
       message.className = "message outage";
-      document.body.style.backgroundColor = "#2b0000";
   }
 
   message.textContent = data.message;
