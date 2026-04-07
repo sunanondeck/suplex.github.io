@@ -2,161 +2,124 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Is Suplex Down?</title>
+<title>Suplex Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  background: #0f0f0f;
-  color: #e6e6e6;
+
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background:#0f0f0f;
+  color:#ffffff;
+  text-align:center;
 }
 
-header {
-  background: #1c1c1c;
-  padding: 28px;
-  text-align: center;
-  border-bottom: 1px solid #2a2a2a;
+header{
+  padding:40px 20px;
 }
 
-h1 {
-  margin: 0;
-  font-weight: 600;
+h1{
+  font-size:42px;
+  margin-bottom:10px;
 }
 
-.container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 0 20px;
+.question{
+  font-size:26px;
+  opacity:0.85;
 }
 
-.status {
-  border-radius: 12px;
-  padding: 26px;
-  margin-bottom: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: background 0.3s ease;
+.answer{
+  font-size:160px;
+  font-weight:800;
+  margin-top:40px;
 }
 
-/* Status colors */
-.operational { background: #123b2c; color: #b2f2bb; }
-.maintenance { background: #3f3511; color: #f5e68f; }
-.outage { background: #3a1414; color: #f5b2b2; }
-
-.status-title {
-  font-size: 24px;
-  font-weight: 700;
+.operational{
+  color:#2ecc71;
 }
 
-.status-message {
-  font-size: 16px;
-  opacity: 0.9;
+.outage{
+  color:#ff4d4d;
 }
 
-.card {
-  background: #1a1a1a;
-  border-radius: 12px;
-  padding: 22px;
-  margin-bottom: 22px;
-  border: 1px solid #2a2a2a;
+.message{
+  margin-top:25px;
+  font-size:20px;
+  opacity:0.9;
 }
 
-.card h3 {
-  margin-top: 0;
+.section{
+  margin-top:60px;
 }
 
-.update {
-  margin-bottom: 10px;
+.maintenance-box{
+  margin:20px auto;
+  padding:20px;
+  max-width:600px;
+  background:#1b1b1b;
+  border-radius:10px;
+  border:1px solid #2a2a2a;
 }
 
-.time {
-  opacity: 0.6;
-  font-size: 13px;
+footer{
+  margin-top:60px;
+  opacity:0.6;
+  font-size:14px;
 }
 
-footer {
-  text-align: center;
-  padding: 30px;
-  opacity: 0.6;
-  font-size: 14px;
-}
 </style>
 </head>
+
 <body>
 
 <header>
-  <h1>Is Suplex Down?</h1>
+<h1>Suplex Status</h1>
+<div class="question">Is Suplex down?</div>
 </header>
 
-<div class="container">
+<div id="answer" class="answer">...</div>
 
-  <!-- Status banner -->
-  <div id="statusBox" class="status">
-    <div class="status-title" id="statusTitle"></div>
-    <div class="status-message" id="statusMessage"></div>
-  </div>
+<div id="message" class="message"></div>
 
-  <!-- Maintenance -->
-  <div class="card">
-    <h3>Scheduled Maintenance</h3>
-    <div id="maintenanceWindow"></div>
-  </div>
-
-  <!-- Updates -->
-  <div class="card">
-    <h3>Recent Updates</h3>
-    <div id="updates"></div>
-  </div>
-
+<div class="section">
+  <h2>Scheduled Maintenance</h2>
+  <div id="maintenance" class="maintenance-box"></div>
 </div>
 
 <footer>
-  Last updated: <span id="lastUpdated"></span>
+Last checked: <span id="updated"></span>
 </footer>
 
 <script>
-async function loadStatus() {
-  const res = await fetch('status.json?v=' + Date.now(), { cache: "no-store" });
+
+async function loadStatus(){
+
+  const res = await fetch('status.json?v=' + Date.now(), {cache:"no-store"});
   const data = await res.json();
 
-  const statusBox = document.getElementById("statusBox");
-  const statusTitle = document.getElementById("statusTitle");
-  const statusMessage = document.getElementById("statusMessage");
-  const maintenanceWindow = document.getElementById("maintenanceWindow");
-  const updates = document.getElementById("updates");
+  const answer = document.getElementById("answer");
+  const message = document.getElementById("message");
+  const maintenance = document.getElementById("maintenance");
 
-  // Reset classes
-  statusBox.classList.remove("operational", "maintenance", "outage");
-  statusBox.classList.add(data.status);
+  if(data.status === "operational"){
+      answer.textContent = "NO";
+      answer.className = "answer operational";
+  } else {
+      answer.textContent = "YES";
+      answer.className = "answer outage";
+  }
 
-  // Set title and message
-  statusTitle.textContent = data.title;
-  statusMessage.textContent = data.message;
+  message.textContent = data.message;
+  maintenance.textContent = data.maintenance;
 
-  // Maintenance info
-  maintenanceWindow.textContent = data.maintenanceWindow;
-
-  // Clear updates
-  updates.innerHTML = "";
-
-  data.updates.forEach(u => {
-    const div = document.createElement("div");
-    div.className = "update";
-    div.innerHTML = `<div class="time">${u.time}</div><div>${u.text}</div>`;
-    updates.appendChild(div);
-  });
-
-  // Update last updated footer
-  document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
+  document.getElementById("updated").textContent =
+      new Date(data.lastChecked).toLocaleString();
 }
 
-// Initial load
 loadStatus();
+setInterval(loadStatus,60000);
 
-// Optional: refresh every 5 minutes automatically
-setInterval(loadStatus, 300000);
 </script>
 
 </body>
