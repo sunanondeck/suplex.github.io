@@ -112,24 +112,6 @@ Last checked: <span id="updated"></span>
 </div>
 
 <script>
-function fetchWithTimeout(url, options={}, timeout=2000){
-  return Promise.race([
-    fetch(url, options),
-    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout))
-  ]);
-}
-
-async function checkServerDirectly(){
-  try {
-    await fetchWithTimeout('https://71.146.187.239:32400/identity?v=' + Date.now(), 
-                           {method:'GET', mode:'no-cors', cache:'no-store'}, 
-                           2000);
-    return { status:"operational", message:"Suplex is running normally.", lastChecked:new Date().toISOString() };
-  } catch(e){
-    return null;
-  }
-}
-
 async function fetchStatusJson(){
   try {
     const res = await fetch('status.json?v=' + Date.now(), {cache:"no-store"});
@@ -139,21 +121,33 @@ async function fetchStatusJson(){
   }
 }
 
+// Real-time server check (CORS-friendly endpoint or proxy)
+async function checkServerLive(){
+  try {
+    // Replace this URL with your own proxy or CORS-enabled server endpoint
+    const res = await fetch('https://your-proxy.example.com/check?server=plex', {cache:"no-store"});
+    if (!res.ok) throw new Error("Server offline");
+    return await res.json(); // should return {status:"operational"/"outage", message:"...", lastChecked:"..."}
+  } catch(e){
+    return null;
+  }
+}
+
 async function updatePage(){
   const now = new Date();
 
   // Run both fetches in parallel
-  const [serverDataResult, jsonDataResult] = await Promise.allSettled([
-    checkServerDirectly(),
+  const [liveResult, jsonResult] = await Promise.allSettled([
+    checkServerLive(),
     fetchStatusJson()
   ]);
 
   let data = null;
 
-  if(serverDataResult.status === "fulfilled" && serverDataResult.value){
-    data = serverDataResult.value;
-  } else if(jsonDataResult.status === "fulfilled" && jsonDataResult.value){
-    data = jsonDataResult.value;
+  if(liveResult.status === "fulfilled" && liveResult.value){
+    data = liveResult.value;
+  } else if(jsonResult.status === "fulfilled" && jsonResult.value){
+    data = jsonResult.value;
   } else {
     data = { status:"outage", message:"Suplex is currently unreachable.", lastChecked: now.toISOString() };
   }
@@ -193,7 +187,7 @@ async function updatePage(){
 }
 
 updatePage();
-setInterval(updatePage, 60000);
+setInterval(updatePage, 30000); // refresh every 30 seconds
 </script>
 
 </body>
