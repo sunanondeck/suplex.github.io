@@ -39,8 +39,13 @@ body{
   transition: top 0.6s ease;
 }
 
+#content{
+  transition: margin-top 0.6s ease;
+  padding-top: 60px; /* default padding for header */
+}
+
 header{
-  padding:60px 20px;
+  padding:0 20px;
 }
 
 .question{
@@ -82,16 +87,18 @@ footer{
 
 <div id="maintenance-banner"></div>
 
-<header>
-  <div class="question">Is Suplex down?</div>
-</header>
+<div id="content">
+  <header>
+    <div class="question">Is Suplex down?</div>
+  </header>
 
-<div id="answer" class="answer">...</div>
-<div id="message" class="message"></div>
+  <div id="answer" class="answer">...</div>
+  <div id="message" class="message"></div>
 
-<footer>
-Last checked: <span id="updated"></span>
-</footer>
+  <footer>
+  Last checked: <span id="updated"></span>
+  </footer>
+</div>
 
 <script>
 async function loadStatus(){
@@ -101,6 +108,7 @@ async function loadStatus(){
   const answer = document.getElementById("answer");
   const message = document.getElementById("message");
   const banner = document.getElementById("maintenance-banner");
+  const content = document.getElementById("content");
 
   // YES / NO and background color
   if(data.status === "operational"){
@@ -119,8 +127,10 @@ async function loadStatus(){
   if(data.maintenance && data.maintenance !== "No scheduled maintenance."){
       banner.textContent = "⚠ Scheduled Maintenance: " + data.maintenance;
       banner.style.top = "0px";
+      content.style.marginTop = "60px"; // shift content down
   } else {
       banner.style.top = "-60px";
+      content.style.marginTop = "0px"; // reset content margin
   }
 
   document.getElementById("updated").textContent =
