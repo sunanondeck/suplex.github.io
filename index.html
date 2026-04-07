@@ -11,6 +11,7 @@
   --plex-dark: #141414;
   --white: #ffffff;
   --down-red: #ff4d4d;
+  --offline-red: #ff1a1a; /* slightly deeper red for OFFLINE message */
 }
 
 body{
@@ -45,19 +46,20 @@ body{
 
 .question{
   font-size:42px;
-  color:var(--plex-orange);
+  color: var(--plex-orange); /* default color */
   font-weight:700;
 }
 
 /* Status box */
 .answer{
-  font-size:160px;
+  font-size: clamp(80px, 20vw, 160px); /* responsive font size */
   font-weight:800;
   margin:40px auto 10px auto;
-  padding:20px 60px;
+  padding: clamp(15px, 5vw, 40px) clamp(30px, 10vw, 60px);
   border-radius:20px;
   border:6px solid;
   display:inline-block;
+  transition: color 0.3s, border-color 0.3s;
 }
 
 /* Server ONLINE */
@@ -66,16 +68,27 @@ body{
   border-color:var(--white);
 }
 
-/* Server OFFLINE */
+/* Server OFFLINE box */
 .outage{
-  color:var(--down-red);
-  border-color:var(--down-red);
+  color:var(--offline-red);
+  border-color:var(--offline-red);
+}
+
+/* OFFLINE message text */
+.offline-message{
+  color: var(--offline-red);
+}
+
+/* Keep question white if server is offline */
+.offline #question {
+  color: var(--white) !important;
 }
 
 .message{
   margin-top:20px;
   font-size:22px;
   font-weight:600;
+  transition: color 0.3s;
 }
 
 footer{
@@ -91,16 +104,14 @@ footer{
 <div id="maintenance-banner"></div>
 
 <div id="content">
+  <div id="question" class="question">Suplex is:</div>
 
-<div class="question">Suplex is:</div>
+  <div id="answer" class="answer">...</div>
+  <div id="message" class="message"></div>
 
-<div id="answer" class="answer">...</div>
-<div id="message" class="message"></div>
-
-<footer>
-Last checked: <span id="updated"></span>
-</footer>
-
+  <footer>
+  Last checked: <span id="updated"></span>
+  </footer>
 </div>
 
 <script>
@@ -111,21 +122,23 @@ async function loadStatus(){
 
     const answer = document.getElementById("answer");
     const message = document.getElementById("message");
-    const banner = document.getElementById("maintenance-banner");
     const content = document.getElementById("content");
 
     if(data.status === "operational"){
         answer.textContent = "ONLINE";
         answer.className = "answer operational";
+        message.textContent = data.message;
         message.className = "message operational";
+        content.classList.remove("offline");
     } else {
         answer.textContent = "OFFLINE";
         answer.className = "answer outage";
-        message.className = "message outage";
+        message.textContent = data.message;
+        message.className = "message offline-message";
+        content.classList.add("offline"); // question text stays white
     }
 
-    message.textContent = data.message;
-
+    const banner = document.getElementById("maintenance-banner");
     if(data.maintenance && data.maintenance !== "No scheduled maintenance."){
         banner.textContent = "⚠ Scheduled Maintenance: " + data.maintenance;
         banner.style.top = "0px";
