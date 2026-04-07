@@ -41,7 +41,5 @@ jobs:
           git config --global user.email "actions@github.com"
 
           git add status.json
-
-          # Force commit every run
           git commit -m "Update Suplex status" --allow-empty
           git push
