@@ -47,22 +47,25 @@ body{
   font-size:42px;
   color: var(--plex-orange);
   font-weight:700;
-  margin: 0 10px; /* avoid overflow on mobile */
+  margin: 0 10px; /* prevent overflow on small screens */
 }
 
 /* Status box */
 .answer{
-  font-size: clamp(80px, 20vw, 160px);
+  font-size: clamp(50px, 12vw, 160px); /* smaller min for mobile */
   font-weight:800;
   margin:40px auto 10px auto;
-  padding: clamp(15px, 5vw, 40px) clamp(20px, 10vw, 60px);
+  padding: clamp(10px, 3vw, 40px) clamp(20px, 10vw, 60px);
   border-radius:20px;
   border:6px solid;
   display:inline-block;
-  max-width: 90%; /* ensures box fits on mobile */
+  max-width: 90%; /* ensure fits screen */
   box-sizing: border-box;
+  word-break: normal;
+  white-space: nowrap; /* prevent text wrap */
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: color 0.3s, border-color 0.3s;
-  word-break: break-word;
 }
 
 /* Server ONLINE */
@@ -120,7 +123,6 @@ async function loadStatus(){
 
     const answer = document.getElementById("answer");
     const message = document.getElementById("message");
-    const content = document.getElementById("content");
 
     if(data.status === "operational"){
         answer.textContent = "ONLINE";
@@ -135,6 +137,7 @@ async function loadStatus(){
     }
 
     const banner = document.getElementById("maintenance-banner");
+    const content = document.getElementById("content");
     if(data.maintenance && data.maintenance !== "No scheduled maintenance."){
         banner.textContent = "⚠ Scheduled Maintenance: " + data.maintenance;
         banner.style.top = "0px";
