@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Is the Suplex down?</title>
+<title>Suplex Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -10,7 +10,7 @@
   --plex-orange: #e5a00d;
   --plex-dark: #141414;
   --white: #ffffff;
-  --down-red: #ff4d4d;
+  --down-red: #8b0000; /* dark crimson for offline */
 }
 
 body {
@@ -121,13 +121,12 @@ async function fetchStatusJson(){
   }
 }
 
-// Real-time server check (CORS-friendly endpoint or proxy)
+// Real-time server check via proxy
 async function checkServerLive(){
   try {
-    // Replace this URL with your own proxy or CORS-enabled server endpoint
-    const res = await fetch('https://your-proxy.example.com/check?server=plex', {cache:"no-store"});
+    const res = await fetch('https://YOUR-PROXY-URL/check', {cache:"no-store"});
     if (!res.ok) throw new Error("Server offline");
-    return await res.json(); // should return {status:"operational"/"outage", message:"...", lastChecked:"..."}
+    return await res.json();
   } catch(e){
     return null;
   }
@@ -136,7 +135,6 @@ async function checkServerLive(){
 async function updatePage(){
   const now = new Date();
 
-  // Run both fetches in parallel
   const [liveResult, jsonResult] = await Promise.allSettled([
     checkServerLive(),
     fetchStatusJson()
@@ -161,15 +159,13 @@ async function updatePage(){
   if(data.status === "operational"){
     answer.textContent = "ONLINE";
     answer.className = "answer operational";
-    message.className = "message operational";
-    question.style.color = "var(--plex-orange)";
   } else {
     answer.textContent = "OFFLINE";
     answer.className = "answer outage";
-    message.className = "message outage";
-    question.style.color = "var(--white)";
   }
 
+  // Keep "Suplex is:" in Plex orange always
+  question.style.color = "var(--plex-orange)";
   message.textContent = data.message;
 
   if(data.maintenance 
