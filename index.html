@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Is the Suplex down?</title>
+<title>Suplex Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -123,20 +123,19 @@ async function fetchStatusJson(){
 
 async function checkServerDirectly(){
   try {
-    await fetch('https://71.146.187.239:32400/identity', {method: 'GET', mode:'no-cors'});
-    return { status: "operational", message: "Suplex is running normally." };
+    await fetch('https://71.146.187.239:32400/identity?v=' + Date.now(), {method:'GET', mode:'no-cors', cache:'no-store'});
+    return { status:"operational", message:"Suplex is running normally.", lastChecked:new Date().toISOString() };
   } catch(e){
-    return { status: "outage", message: "Suplex is currently unreachable." };
+    return null;
   }
 }
 
 async function updatePage(){
   let data = await checkServerDirectly();
-
   if(!data){
     data = await fetchStatusJson();
     if(!data){
-      data = { status:"outage", message:"Could not fetch status.", lastChecked: new Date().toISOString() };
+      data = { status:"outage", message:"Suplex is currently unreachable.", lastChecked: new Date().toISOString() };
     }
   }
 
@@ -145,6 +144,7 @@ async function updatePage(){
   const banner = document.getElementById("maintenance-banner");
   const content = document.getElementById("content");
   const question = document.querySelector(".question");
+  const now = new Date();
 
   if(data.status === "operational"){
     answer.textContent = "ONLINE";
@@ -160,7 +160,6 @@ async function updatePage(){
 
   message.textContent = data.message;
 
-  const now = new Date();
   if(data.maintenance 
       && data.maintenance !== "No scheduled maintenance." 
       && (!data.maintenanceExpires || new Date(data.maintenanceExpires) > now)) {
@@ -172,8 +171,7 @@ async function updatePage(){
       content.style.marginTop = "0px";
   }
 
-  document.getElementById("updated").textContent =
-      new Date(data.lastChecked || new Date()).toLocaleString();
+  document.getElementById("updated").textContent = new Date(data.lastChecked).toLocaleString();
 }
 
 updatePage();
