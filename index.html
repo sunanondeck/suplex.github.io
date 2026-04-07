@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Is the Suplex down?</title>
+<title>Suplex Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -23,7 +23,6 @@ body {
   overflow-x:hidden;
 }
 
-/* Maintenance banner */
 #maintenance-banner {
   position:fixed;
   top:-60px;
@@ -51,9 +50,8 @@ body {
   word-break: break-word;
 }
 
-/* YES / NO box */
 .answer {
-  font-size:12vw; /* scales with screen width */
+  font-size:12vw;
   font-weight:800;
   margin:40px auto 10px auto;
   padding:10px 20px;
@@ -67,13 +65,11 @@ body {
   transition: font-size 0.2s;
 }
 
-/* Server ONLINE */
 .operational {
   color:var(--white);
   border-color:var(--white);
 }
 
-/* Server OFFLINE */
 .outage {
   color:var(--down-red);
   border-color:var(--down-red);
@@ -91,15 +87,9 @@ footer {
   font-size:14px;
 }
 
-/* Mobile adjustments */
 @media (max-width: 480px) {
-  .question {
-    font-size:32px;
-  }
-  .answer {
-    font-size:18vw;
-    padding:8px 16px;
-  }
+  .question { font-size:32px; }
+  .answer { font-size:18vw; padding:8px 16px; }
 }
 </style>
 </head>
@@ -122,9 +112,33 @@ Last checked: <span id="updated"></span>
 </div>
 
 <script>
-async function loadStatus(){
-  const res = await fetch('status.json?v=' + Date.now(), {cache:"no-store"});
-  const data = await res.json();
+async function fetchStatusJson(){
+  try {
+    const res = await fetch('status.json?v=' + Date.now(), {cache:"no-store"});
+    return await res.json();
+  } catch(e){
+    return null;
+  }
+}
+
+async function checkServerDirectly(){
+  try {
+    await fetch('https://71.146.187.239:32400/identity', {method: 'GET', mode:'no-cors'});
+    return { status: "operational", message: "Suplex is running normally." };
+  } catch(e){
+    return { status: "outage", message: "Suplex is currently unreachable." };
+  }
+}
+
+async function updatePage(){
+  let data = await checkServerDirectly();
+
+  if(!data){
+    data = await fetchStatusJson();
+    if(!data){
+      data = { status:"outage", message:"Could not fetch status.", lastChecked: new Date().toISOString() };
+    }
+  }
 
   const answer = document.getElementById("answer");
   const message = document.getElementById("message");
@@ -133,15 +147,15 @@ async function loadStatus(){
   const question = document.querySelector(".question");
 
   if(data.status === "operational"){
-      answer.textContent = "ONLINE";
-      answer.className = "answer operational";
-      message.className = "message operational";
-      question.style.color = "var(--plex-orange)"; // default question color
+    answer.textContent = "ONLINE";
+    answer.className = "answer operational";
+    message.className = "message operational";
+    question.style.color = "var(--plex-orange)";
   } else {
-      answer.textContent = "OFFLINE";
-      answer.className = "answer outage";
-      message.className = "message outage";
-      question.style.color = "var(--white)"; // question white when offline
+    answer.textContent = "OFFLINE";
+    answer.className = "answer outage";
+    message.className = "message outage";
+    question.style.color = "var(--white)";
   }
 
   message.textContent = data.message;
@@ -159,11 +173,11 @@ async function loadStatus(){
   }
 
   document.getElementById("updated").textContent =
-      new Date(data.lastChecked).toLocaleString();
+      new Date(data.lastChecked || new Date()).toLocaleString();
 }
 
-loadStatus();
-setInterval(loadStatus,60000);
+updatePage();
+setInterval(updatePage, 60000);
 </script>
 
 </body>
