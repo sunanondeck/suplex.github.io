@@ -77,6 +77,7 @@ body {
   margin-top:20px;
   font-size:22px;
   font-weight:600;
+  transition: color 0.2s;
 }
 
 footer {
@@ -159,11 +160,13 @@ async function updatePage(){
     answer.className = "answer operational";
     message.className = "message operational";
     question.style.color = "var(--plex-orange)";
+    message.style.color = "var(--white)";
   } else {
     answer.textContent = "OFFLINE";
     answer.className = "answer outage";
     message.className = "message outage";
     question.style.color = "var(--white)";
+    message.style.color = "var(--white)";
   }
 
   message.textContent = data.message;
