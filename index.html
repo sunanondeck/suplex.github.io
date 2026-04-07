@@ -1,158 +1,146 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Is Suplex down?</title>
-
+<title>Suplex Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Prevent caching -->
-<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
 <style>
+:root {
+  --plex-orange: #e5a00d;
+  --plex-dark: #141414;
+  --white: #ffffff;
+  --down-red: #ff4d4d;
+}
 
 body{
   margin:0;
-  background:#111;
-  color:white;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  background: var(--plex-dark);
+  color: var(--white);
   text-align:center;
+  transition: background 0.4s;
+  overflow-x:hidden;
 }
 
 /* Maintenance banner */
-
-#banner{
-  display:none;
+#maintenance-banner{
   position:fixed;
-  top:0;
+  top:-60px;
   left:0;
   width:100%;
-  background:#e5a00d;
-  color:black;
-  font-weight:600;
-  padding:14px;
-  z-index:1000;
+  background:var(--plex-orange);
+  color:#141414;
+  font-weight:700;
+  padding:15px 0;
+  font-size:18px;
+  z-index:9999;
+  transition:top 0.6s ease;
 }
 
-.banner-visible main{
-  margin-top:70px;
-}
-
-/* Layout */
-
-main{
+#content{
+  transition:margin-top 0.6s ease;
   padding-top:60px;
 }
 
-/* Title */
-
-h1{
+.question{
   font-size:42px;
-  margin-bottom:40px;
+  color:var(--plex-orange);
+  font-weight:700;
 }
 
-/* Status box */
-
-.answer-box{
-  width:260px;
-  height:140px;
-  margin:0 auto;
-  border:4px solid white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:90px;
+/* YES / NO box */
+.answer{
+  font-size:160px;
   font-weight:800;
+  margin:40px auto 10px auto;
+  padding:20px 60px;
+  border-radius:20px;
+  border:6px solid;
+  display:inline-block;
 }
 
-/* status colors */
-
+/* Server UP */
 .operational{
-  color:white;
-  border-color:white;
+  color:var(--white);
+  border-color:var(--white);
 }
 
+/* Server DOWN */
 .outage{
-  color:#ff4d4d;
-  border-color:#ff4d4d;
+  color:var(--down-red);
+  border-color:var(--down-red);
 }
 
-/* status message */
-
-#message{
-  font-size:20px;
+.message{
   margin-top:20px;
+  font-size:22px;
+  font-weight:600;
 }
 
-/* last checked */
-
-#checked{
-  margin-top:30px;
+footer{
+  margin-top:60px;
+  opacity:0.6;
   font-size:14px;
-  opacity:0.7;
 }
-
 </style>
 </head>
 
 <body>
 
-<div id="banner"></div>
+<div id="maintenance-banner"></div>
 
-<main>
+<div id="content">
 
-<h1>Is Suplex down?</h1>
+<div class="question">Is Suplex down?</div>
 
-<div id="answerBox" class="answer-box">
-<span id="answer">...</span>
+<div id="answer" class="answer">...</div>
+<div id="message" class="message"></div>
+
+<footer>
+Last checked: <span id="updated"></span>
+</footer>
+
 </div>
 
-<div id="message"></div>
-
-<div id="checked"></div>
-
-</main>
-
 <script>
-
-fetch("status.json?nocache=" + Date.now())
-.then(r => r.json())
-.then(data => {
+async function loadStatus(){
+  const res = await fetch('status.json?v=' + Date.now(), {cache:"no-store"});
+  const data = await res.json();
 
   const answer = document.getElementById("answer");
-  const box = document.getElementById("answerBox");
   const message = document.getElementById("message");
-  const checked = document.getElementById("checked");
-  const banner = document.getElementById("banner");
+  const banner = document.getElementById("maintenance-banner");
+  const content = document.getElementById("content");
 
   if(data.status === "operational"){
       answer.textContent = "NO";
-      box.className = "answer-box operational";
-      message.className = "operational";
+      answer.className = "answer operational";
+      message.className = "message operational";
   } else {
       answer.textContent = "YES";
-      box.className = "answer-box outage";
-      message.className = "outage";
+      answer.className = "answer outage";
+      message.className = "message outage";
   }
 
   message.textContent = data.message;
 
-  const d = new Date(data.last_checked);
-  checked.textContent = "Last checked: " + d.toLocaleString();
-
-  if(data.banner && data.banner.trim() !== ""){
-      banner.textContent = data.banner;
-      banner.style.display = "block";
-      document.body.classList.add("banner-visible");
+  if(data.maintenance && data.maintenance !== "No scheduled maintenance."){
+      banner.textContent = "⚠ Scheduled Maintenance: " + data.maintenance;
+      banner.style.top = "0px";
+      content.style.marginTop = "60px";
+  } else {
+      banner.style.top = "-60px";
+      content.style.marginTop = "0px";
   }
 
-});
+  document.getElementById("updated").textContent =
+      new Date(data.lastChecked).toLocaleString();
+}
 
+loadStatus();
+setInterval(loadStatus,60000);
 </script>
 
 </body>
 </html>
-```
