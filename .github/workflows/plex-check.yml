@@ -15,7 +15,6 @@ jobs:
 
       - name: Check Suplex server
         run: |
-          # Determine status
           if curl -k -s --retry 3 --max-time 30 https://71.146.187.239:32400/identity > /dev/null; then
             STATUS="operational"
             MESSAGE="Suplex is running normally."
@@ -26,12 +25,21 @@ jobs:
 
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          # Update status.json with debug field
+          MAINTENANCE="Server will be down nightly from 4/6 to 4/13 between 9pm-9am PST"
+          MAINT_EXPIRES="2026-04-14T09:00:00Z"
+
           jq --arg status "$STATUS" \
              --arg message "$MESSAGE" \
              --arg time "$TIMESTAMP" \
+             --arg maintenance "$MAINTENANCE" \
+             --arg maintenanceExpires "$MAINT_EXPIRES" \
              --arg debug "workflow ran" \
-             '.status=$status | .message=$message | .lastChecked=$time | .debug=$debug' \
+             '.status=$status 
+              | .message=$message 
+              | .lastChecked=$time 
+              | .maintenance=$maintenance 
+              | .maintenanceExpires=$maintenanceExpires 
+              | .debug=$debug' \
              status.json > tmp.json
 
           mv tmp.json status.json
