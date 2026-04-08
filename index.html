@@ -5,6 +5,18 @@
 <title>Is the Suplex down?</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- Link preview metadata -->
+<meta property="og:title" content="Is the Suplex down?" />
+<meta property="og:description" content="Real-time status for the Suplex media server." />
+<meta property="og:image" content="https://sunanondeck.github.io/plex-status/suplex_logo.png" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sunanondeck.github.io/plex-status/" />
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Is the Suplex down?">
+<meta name="twitter:description" content="Real-time status for the Suplex media server.">
+<meta name="twitter:image" content="https://sunanondeck.github.io/plex-status/suplex_logo.png">
+
 <style>
 :root {
   --plex-orange: #e5a00d;
@@ -120,7 +132,6 @@ async function fetchStatusJson(){
   }
 }
 
-// Real-time server check via proxy
 async function checkServerLive(){
   try {
     const res = await fetch('https://YOUR-PROXY-URL/check', {cache:"no-store"});
@@ -186,7 +197,7 @@ async function updatePage(){
 }
 
 updatePage();
-setInterval(updatePage, 30000); // refresh every 30 seconds
+setInterval(updatePage, 30000);
 </script>
 
 </body>
