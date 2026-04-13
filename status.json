@@ -1,8 +1,8 @@
 {
-  "status": "operational",
-  "message": "Suplex is running normally.",
+  "status": "outage",
+  "message": "Suplex is currently unreachable.",
   "maintenance": "Server will be down nightly from 4/6 to 4/13 between 9pm-9am PST",
   "maintenanceExpires": "2026-04-14T09:00:00Z",
-  "lastChecked": "2026-04-13T03:50:56Z",
+  "lastChecked": "2026-04-13T06:12:39Z",
   "debug": "workflow ran"
 }
